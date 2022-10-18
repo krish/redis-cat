@@ -5,10 +5,15 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  /* Setting up the logger to use pino. */
   app.useLogger(app.get(Logger));
+  /* Setting the prefix for all the routes. */
   app.setGlobalPrefix('redis-cat');
+  /* It enables CORS for all the routes. */
   app.enableCors();
   let configuration: Omit<OpenAPIObject, 'paths'>;
+  /* Checking if the environment variable SERVER_BASE_URL is set or not. If it is set, it will add the
+  server name and base url to the swagger documentation. */
   if (process.env.SERVER_BASE_URL) {
     configuration = new DocumentBuilder()
       .setTitle('Redis Cat')

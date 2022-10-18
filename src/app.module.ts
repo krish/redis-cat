@@ -7,6 +7,7 @@ import { RedisModule } from './redis/redis.module';
   imports: [
     ConfigModule.forRoot(),
     RedisModule,
+    /* Setting up the logger. */
     LoggerModule.forRoot({
       pinoHttp: [
         {
