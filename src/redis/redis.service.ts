@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import Redis from 'ioredis';
+import Redis, { ClientContext, Result } from 'ioredis';
 import { PinoLogger } from 'nestjs-pino';
 
 @Injectable()
@@ -117,6 +117,46 @@ is an object, it will parse the data to JSON and return it. */
   async getLrangeFromList(key: string, from: number, to: number) {
     return await this.redis.lrange(key, from, to).catch((e) => {
       this._logger.error(e, `error on fetching data from list`);
+      throw new Error(e.message);
+    });
+  }
+
+  /**
+   * It adds data to a set
+   * @param {string} key - string - the key of the set
+   * @param {string[]} data - string[] - the data to be added to the set
+   */
+  async saddToSet(key: string, data: string[]) {
+    this._logger.debug(`adding ${data} to set`);
+
+    await this.redis.sadd(key, ...data).catch((e) => {
+      this._logger.error(e, `error on adding data to set`);
+      throw new Error(e.message);
+    });
+  }
+
+  /**
+   * It fetches all the members of a set from Redis
+   * @param {string} key - string - The key of the set you want to fetch the members of.
+   * @returns An array of members of the set.
+   */
+  async getMembersOfSet(key: string) {
+    const result = await this.redis.smembers(key).catch((e) => {
+      this._logger.error(e, `error on fetching members from set`);
+      throw new Error(e.message);
+    });
+    return JSON.stringify(result);
+  }
+
+  /**
+   * It removes members from a set
+   * @param {string} key - The key of the set
+   * @param {string[]} data - string[] - the data to be added to the set
+   * @returns The number of members that were removed from the set, not including non existing members.
+   */
+  async removeMembersFromSet(key: string, data: string[]) {
+    return await this.redis.srem(key, ...data).catch((e) => {
+      this._logger.error(e, `error on removing members from set`);
       throw new Error(e.message);
     });
   }
