@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
-import { Logger } from 'nestjs-pino';
+import { Logger, PinoLogger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -32,8 +32,10 @@ async function bootstrap() {
   SwaggerModule.setup('/', app, document);
 
   const port = process.env.PORT || 8191;
+  const logger = new PinoLogger({});
+  logger.setContext('RedisCatApplication');
   await app.listen(port, () =>
-    console.log(`Application started on port ${port}`),
+    logger.info(`Application started on port ${port}`),
   );
 }
 bootstrap();
