@@ -136,7 +136,7 @@ export class RedisController {
   @Post('values/lists/lpush/:key')
   /**
    * "This function takes a key and a payload, and pushes the payload to the list at the key."
-   *
+   * lpush used in URL since there are two ways to add values to list
    * The @Param() decorator is used to get the key from the URL. The @Body() decorator is used to get the
    * payload from the request body
    * @param {string} key - The key of the list you want to push to.
@@ -164,6 +164,49 @@ export class RedisController {
     @Query('to') to: number,
   ) {
     return await this._redis.getLrangeFromList(key, from, to).catch((e) => {
+      throw new InternalServerErrorException(e.message);
+    });
+  }
+
+  @ApiTags('Set')
+  @Post('values/sets/:key')
+  /**
+   * It adds members to a set
+   * @param {string} key - The key of the set you want to add members to.
+   * @param payload - [string]
+   * @returns The number of members added to the set.
+   */
+  async addMembersToSet(@Param('key') key: string, @Body() payload: [string]) {
+    return await this._redis.saddToSet(key, payload).catch((e) => {
+      throw new InternalServerErrorException(e.message);
+    });
+  }
+
+  @ApiTags('Set')
+  @Get('values/sets/members/:key')
+  /**
+   * It returns the members of a set stored in Redis
+   * @param {string} key - The key of the set you want to get the members of.
+   * @returns The members of the set.
+   */
+  async getMembersOfSet(@Param('key') key: string) {
+    return await this._redis.getMembersOfSet(key).catch((e) => {
+      throw new InternalServerErrorException(e.message);
+    });
+  }
+  @ApiTags('Set')
+  @Delete('values/sets/:key')
+  /**
+   * It removes members from a set
+   * @param {string} key - The key of the set you want to remove members from.
+   * @param payload - [string]
+   * @returns The number of members that were removed from the set, not including non existing members.
+   */
+  async removeMembersFromSet(
+    @Param('key') key: string,
+    @Body() payload: [string],
+  ) {
+    return await this._redis.removeMembersFromSet(key, payload).catch((e) => {
       throw new InternalServerErrorException(e.message);
     });
   }
